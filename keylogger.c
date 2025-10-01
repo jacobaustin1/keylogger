@@ -7,7 +7,7 @@
 #include <string.h>
 #pragma comment(lib, "ws2_32.lib")
 
-#define SERVER "127.0.0.1"
+#define SERVER "10.2.0.19"
 #define PORT 80
 #define LOG_BUFFER_SIZE 1024
 
